@@ -1,0 +1,43 @@
+FROM debian:buster-slim
+
+arg admin_username
+arg admin_password
+arg server_name
+arg server_short_name
+
+ENV ADMIN_USERNAME ${admin_username}
+ENV ADMIN_PASSWORD ${admin_password}
+ENV SERVER_NAME ${server_name}
+ENV SERVER_SHORT_NAME ${server_short_name}
+
+EXPOSE 7777/udp
+EXPOSE 7778/udp
+EXPOSE 7779/udp
+EXPOSE 27900/udp
+
+EXPOSE 7777/tcp
+EXPOSE 7778/tcp
+EXPOSE 7779/tcp
+EXPOSE 27900/tcp
+EXPOSE 8080/tcp
+
+RUN apt-get -y -q update && \
+    apt-get install -y -q libxi6 libx11-6 libc6 libc6-i386 \
+    tini \
+    procps
+
+RUN adduser --gecos "" --disabled-password ut99
+
+WORKDIR /home/ut99
+
+ADD docker-target/ut-server-436.tar.gz ./
+ADD docker-target/UTPGPatch451LINUX.tar.tar ./ut-server
+ADD docker-target/asu-0.6.tar.gz ./ut-server
+ADD docker/setup-ut.sh ./
+ADD docker/command.sh ./
+RUN bash ./setup-ut.sh && \
+    rm ./setup-ut.sh && \
+    chmod +x command.sh 
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["/home/ut99/command.sh"]

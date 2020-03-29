@@ -1,0 +1,59 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "region":         "us-east-2"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "us-east-2",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "name": "amzn2-ami-hvm-2.0.*",
+        "root-device-type": "ebs"
+      },
+      "owners": ["137112412989"],
+      "most_recent": true
+    },
+    "instance_type": "t3a.nano",
+    "ssh_username": "ec2-user",
+    "ami_name": "ut99-server-{{timestamp}}",
+    "tags": {
+      "Name": "Unreal Tournament 99 Server {{timestamp}}",
+      "Owner": "zeeb.brandon@gmail.com"
+    },
+    "launch_block_device_mappings": [{
+      "volume_size": "8",
+      "device_name": "/dev/xvda",
+      "delete_on_termination": true
+    }]  
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "etc/systemd/system/utserver.service",
+      "destination": "/tmp/utserver.service"
+    },
+    {
+      "type": "file",
+      "source": "ut-server/System/UnrealTournament.ini",
+      "destination": "/tmp/UnrealTournament.ini"
+    },
+    {
+      "type": "shell",
+      "environment_vars": [
+        "AWS_ACCESS_KEY_ID={{user `aws_access_key`}}",
+        "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}",
+        "AWS_DEFAULT_REGION=us-east-2"
+      ],
+      "scripts": [
+        "amzl/10-setup.sh",
+        "amzl/11-yum-sources.sh",
+        "amzl/12-yum-packages.sh",
+        "amzl/20-setup-ut.sh",
+        "amzl/21-enable-service.sh"
+      ]
+    }
+  ]
+}
