@@ -36,16 +36,16 @@
       "destination": "/tmp/utserver.service"
     },
     {
-      "type": "file",
-      "source": "ut-server/System/UnrealTournament.ini",
-      "destination": "/tmp/UnrealTournament.ini"
-    },
-    {
       "type": "shell",
       "environment_vars": [
         "AWS_ACCESS_KEY_ID={{user `aws_access_key`}}",
         "AWS_SECRET_ACCESS_KEY={{user `aws_secret_key`}}",
-        "AWS_DEFAULT_REGION=us-east-2"
+        "AWS_DEFAULT_REGION=us-east-2",
+        "S3_ARTIFACTS_BUCKET={{user `s3_artifacts_bucket`}}",
+        "SERVER_NAME={{user `server_name`}}",
+        "SERVER_SHORT_NAME={{user `server_short_name`}}",
+        "ADMIN_USERNAME={{user `admin_username`}}",
+        "ADMIN_PASSWORD={{user `admin_password`}}"
       ],
       "scripts": [
         "amzl/10-setup.sh",
